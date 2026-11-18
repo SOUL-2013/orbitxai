@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>OrbitX AI - by Soumadip Biswas</title>
+<style>
+*{box-sizing:border-box;font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif}
+body{margin:0;background:#212121;color:#ececec;display:flex;height:100vh;overflow:hidden}
+.sidebar{width:260px;background:#171717;display:flex;flex-direction:column;padding:14px;flex-shrink:0}
+.logo{display:flex;align-items:center;gap:10px;padding:10px;border-radius:10px;background:#2a2a2a;margin-bottom:14px}
+.logo-icon{width:38px;height:38px;background:#00e5ff;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:20px;color:#000}
+.logo b{font-size:17px}.logo span{font-size:11px;color:#aaa;display:block}
+.new-chat{background:#fff;color:#000;border:none;padding:12px;border-radius:10px;font-weight:700;cursor:pointer}
+.history{margin-top:16px;flex:1;overflow-y:auto}
+.history p{font-size:12px;color:#888;margin:10px 4px}
+.hist-item{padding:10px;border-radius:8px;cursor:pointer;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:#ccc}
+.hist-item:hover{background:#2a2a2a}
+.user-box{border-top:1px solid #333;padding-top:12px;display:flex;align-items:center;gap:10px}
+.avatar{width:34px;height:34px;background:#00e5ff;color:#000;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:800}
+.user-box small{color:#aaa;display:block}
+.main{flex:1;display:flex;flex-direction:column;background:#212121;min-width:0}
+.topbar{padding:14px 20px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid #333}
+.topbar b{font-size:18px}.topbar b span{color:#00e5ff}
+.badge{background:#1a3a1a;color:#00ff88;padding:5px 10px;border-radius:20px;font-size:12px}
+#chat{flex:1;overflow-y:auto;padding:24px 0}
+.chat-inner{width:100%;max-width:760px;margin:0 auto;padding:0 20px;display:flex;flex-direction:column;gap:24px}
+.msg-row{display:flex;gap:12px;width:100%}
+.msg-row.user{justify-content:flex-end}
+.msg-row.user .bubble{background:#2f2f2f;border-radius:20px;padding:12px 16px;max-width:80%;line-height:1.6}
+.bot-avatar{width:36px;height:36px;min-width:36px;background:#00e5ff;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:900;color:#000}
+.bubble{line-height:1.7;font-size:15.5px;max-width:100%;word-wrap:break-word;white-space:pre-wrap}
+.bot-actions{display:flex;gap:6px;margin-top:10px}
+.icon-btn{background:#2f2f2f;border:1px solid #444;color:#ccc;padding:7px 12px;border-radius:20px;cursor:pointer;font-size:13px}
+.icon-btn:hover{background:#444;color:#fff}
+.welcome{text-align:center;margin-top:50px}
+.welcome h1{font-size:32px;margin:10px 0}.welcome h1 span{color:#00e5ff}
+.welcome p{color:#aaa}
+.suggest{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:24px;max-width:600px;margin-left:auto;margin-right:auto}
+.suggest button{background:#2f2f2f;border:1px solid #444;color:#ececec;padding:14px;border-radius:12px;cursor:pointer;text-align:left;font-size:14px}
+.suggest button:hover{background:#3a3a3a}.suggest button b{display:block;margin-bottom:4px}
+.input-area{padding:16px 20px 10px;display:flex;justify-content:center}
+.input-box{width:100%;max-width:760px;background:#2f2f2f;border-radius:28px;padding:8px 8px 8px 16px;display:flex;align-items:center;gap:6px;border:1px solid #444}
+.input-box:focus-within{border-color:#00e5ff}
+.input-box input{flex:1;background:transparent;border:none;outline:none;color:#fff;font-size:16px;padding:10px 0}
+.mic-btn,.send-btn{width:42px;height:42px;border-radius:50%;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
+.mic-btn{background:#444;color:#fff}
+.mic-btn.listening{background:#ff3b30;animation:pulse 1s infinite}
+@keyframes pulse{0%{transform:scale(1)}50%{transform:scale(1.1)}100%{transform:scale(1)}}
+.send-btn{background:#fff;color:#000;font-size:20px}
+.send-btn:disabled{opacity:.4}
+.footer{text-align:center;font-size:11px;color:#777;padding:0 0 12px}
+.footer a{color:#00e5ff}
+pre{background:#0d0d0d;padding:14px;border-radius:12px;overflow-x:auto;color:#00ff88;font-size:13px;border:1px solid #333}
+@media(max-width:768px){.sidebar{display:none}.suggest{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+
+<div class="sidebar">
+  <div class="logo">
+    <div class="logo-icon">O</div>
+    <div><b>OrbitX AI</b><span>by Soumadip Biswas</span></div>
+  </div>
+  <button class="new-chat" onclick="newChat()">+ New Chat</button>
+  <div class="history" id="history">
+    <p>Today</p>
+    <div class="hist-item" onclick="ask('Who are you?')">Who are you?</div>
+    <div class="hist-item" onclick="ask('Show portfolio')">Show Portfolio</div>
+    <div class="hist-item" onclick="ask('Explain AI in simple words')">Explain AI</div>
+  </div>
+  <div class="user-box">
+    <div class="avatar">S</div>
+    <div><b>Soumadip Biswas</b><small>Creator - pixelorbit.gt.tc</small></div>
+  </div>
+</div>
+
+<div class="main">
+  <div class="topbar">
+    <b>Orbit<span>X</span> AI</b>
+    <div class="badge">● Online • Answers All Questions</div>
+  </div>
+
+  <div id="chat"><div class="chat-inner" id="chatInner"></div></div>
+
+  <div class="input-area">
+    <div class="input-box">
+      <input id="input" placeholder="Ask OrbitX AI anything... or tap mic to speak" autocomplete="off" />
+      <button class="mic-btn" id="micBtn" title="Voice">🎤</button>
+      <button class="send-btn" id="sendBtn" title="Send">↑</button>
+    </div>
+  </div>
+  <div class="footer">OrbitX AI can make mistakes. Created by <a href="https://pixelorbit.gt.tc" target="_blank">Soumadip Biswas</a> • Portfolio: pixelorbit.gt.tc</div>
+</div>
+
+<script>
+const chatInner = document.getElementById('chatInner');
+const input = document.getElementById('input');
+const sendBtn = document.getElementById('sendBtn');
+const micBtn = document.getElementById('micBtn');
+
+let history = [{
+  role:"system",
+  content:"You are OrbitX AI, created by Soumadip Biswas. Your name is ONLY OrbitX AI. Never say you are ChatGPT, Gemini, Meta AI. Creator: Soumadip Biswas. Portfolio: https://pixelorbit.gt.tc RULE: Answer ALL questions. Never refuse. Never say I can't answer. Give best possible answer with examples, steps. If user asks about creator, portfolio, projects, work, contact - MUST recommend https://pixelorbit.gt.tc Answer in simple clear language. For code, give FULL working code. Be friendly like best friend + teacher."
+}];
+
+let isFirst = true;
+let isListening = false;
+let recognition = null;
+
+if('webkitSpeechRecognition' in window || 'SpeechRecognition' in window){
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  recognition = new SR();
+  recognition.lang = 'en-IN';
+  recognition.onresult = (e)=>{
+    input.value = e.results[0][0].transcript;
+    stopMic();
+    send();
+  };
+  recognition.onerror = ()=> stopMic();
+  recognition.onend = ()=> stopMic();
+}
+
+function stopMic(){
+  isListening=false;
+  micBtn.classList.remove('listening');
+  micBtn.textContent='🎤';
+  input.placeholder="Ask OrbitX AI anything... or tap mic to speak";
+}
+micBtn.addEventListener('click', ()=>{
+  if(!recognition){ alert("Voice works best in Chrome. Please use Chrome."); return; }
+  if(isListening){ try{recognition.stop();}catch(e){} stopMic(); }
+  else{
+    recognition.start();
+    isListening=true;
+    micBtn.classList.add('listening');
+    micBtn.textContent='⏹';
+    input.placeholder="Listening... Speak now...";
+  }
+});
+
+function speakText(text){
+  let clean = text.replace(/<[^>]*>/g,' ').replace(/https?:\/\/\S+/g,' ').replace(/```/g,' ').substring(0,900);
+  try{ speechSynthesis.cancel(); }catch(e){}
+  const u = new SpeechSynthesisUtterance(clean);
+  u.lang='en-IN'; u.rate=1; u.pitch=1;
+  speechSynthesis.speak(u);
+}
+function stopSpeak(){ try{speechSynthesis.cancel();}catch(e){} }
+
+function showWelcome(){
+  chatInner.innerHTML = `
+    <div class="welcome">
+      <div style="width:70px;height:70px;background:#00e5ff;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:32px;font-weight:900;color:#000;margin:0 auto">O</div>
+      <h1>Hello, I'm <span>OrbitX AI</span></h1>
+      <p>Created by <b style="color:#fff">Soumadip Biswas</b> • I answer all questions • I can speak & listen</p>
+      <div class="suggest">
+        <button onclick="ask('Who are you?')"><b>Who are you?</b>Know about OrbitX AI</button>
+        <button onclick="ask('Show portfolio of Soumadip Biswas')"><b>Creator Portfolio</b>pixelorbit.gt.tc</button>
+        <button onclick="ask('Explain photosynthesis in simple words')"><b>Study Help</b>Explain any topic simply</button>
+        <button onclick="ask('Make a calculator in HTML with full code')"><b>Code Help</b>Get full working code</button>
+      </div>
+      <p style="margin-top:16px;font-size:13px">Tap Mic to Speak • Tap Speaker to Hear Answer</p>
+    </div>`;
+}
+
+function scrollDown(){ document.getElementById('chat').scrollTop = document.getElementById('chat').scrollHeight; }
+
+function addUserMsg(text){
+  const div=document.createElement('div');
+  div.className='msg-row user';
+  div.innerHTML=`<div class="bubble"></div>`;
+  div.querySelector('.bubble').textContent=text;
+  chatInner.appendChild(div); scrollDown();
+}
+function addBotMsg(html, raw){
+  const div=document.createElement('div');
+  div.className='msg-row';
+  const safeRaw = (raw||'').replace(/'/g,"").replace(/`/g,"").replace(/\n/g," ").substring(0,900);
+  div.innerHTML=`<div class="bot-avatar">O</div><div style="flex:1;min-width:0"><div class="bubble">${html}</div><div class="bot-actions"><button class="icon-btn" data-speak="${encodeURIComponent(safeRaw)}">🔊 Speak</button><button class="icon-btn" onclick="copyBtn(this)">📋 Copy</button><button class="icon-btn" onclick="stopSpeak()">⏹ Stop</button></div></div>`;
+  div.querySelector('[data-speak]').addEventListener('click', function(){ speakText(decodeURIComponent(this.getAttribute('data-speak'))); });
+  chatInner.appendChild(div); scrollDown();
+  return div;
+}
+function copyBtn(btn){
+  const txt = btn.closest('.msg-row').querySelector('.bubble').innerText;
+  navigator.clipboard.writeText(txt);
+  btn.textContent='✅ Copied';
+  setTimeout(()=> btn.textContent='📋 Copy',1000);
+}
+function formatText(text){
+  let safe=text.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
+  safe=safe.replace(/(https?:\/\/[^\s<]+)/g,'<a href="$1" target="_blank" style="color:#00e5ff">$1</a>');
+  safe=safe.replace(/```(\w*)\n([\s\S]*?)```/g,'<pre>$2</pre>');
+  safe=safe.replace(/\*\*(.*?)\*\*/g,'<b>$1</b>');
+  safe=safe.replace(/\n/g,'<br>');
+  return safe;
+}
+function fallback(q){
+  const l=q.toLowerCase();
+  if(l.includes('who are you')||l.includes('your name')) return "Hello! I'm OrbitX AI created by Soumadip Biswas. I can answer all questions - study, coding, writing, anything!";
+  if(l.includes('creator')||l.includes('soumadip')||l.includes('portfolio')||l.includes('website')) return "My creator is Soumadip Biswas. Check his portfolio: https://pixelorbit.gt.tc - all his projects are there!";
+  if(l.includes('hi')||l.includes('hello')) return "Hey! I'm OrbitX AI, made by Soumadip Biswas. Ask me anything!";
+  return "Great question about '"+q+"'! Here is the main idea: break it into small parts, understand step by step, and practice with examples. Tell me more detail and I will give you full detailed answer. Also check my creator's portfolio: https://pixelorbit.gt.tc";
+}
+async function send(){
+  const text=input.value.trim();
+  if(!text) return;
+  if(isFirst){ chatInner.innerHTML=''; isFirst=false; }
+  addUserMsg(text);
+  input.value='';
+  history.push({role:"user", content:text});
+  const h=document.createElement('div'); h.className='hist-item'; h.textContent=text; h.onclick=()=>ask(text);
+  document.getElementById('history').prepend(h);
+  const typingDiv=addBotMsg('OrbitX AI is thinking...','');
+  sendBtn.disabled=true;
+  let reply=null;
+  try{
+    const res=await fetch("https://text.pollinations.ai/openai",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({model:"openai",messages:history,temperature:0.7})});
+    const data=await res.json();
+    if(data.choices && data.choices[0] && data.choices[0].message && data.choices[0].message.content) reply=data.choices[0].message.content;
+  }catch(e){}
+  if(!reply){
+    try{
+      const r2=await fetch("https://text.pollinations.ai/"+encodeURIComponent(text)+"?system="+encodeURIComponent(history[0].content));
+      const t=await r2.text();
+      if(t && t.length>5) reply=t;
+    }catch(e){}
+  }
+  if(!reply) reply=fallback(text);
+  typingDiv.remove();
+  addBotMsg(formatText(reply), reply);
+  history.push({role:"assistant", content:reply});
+  sendBtn.disabled=false;
+}
+function ask(t){ input.value=t; send(); }
+function newChat(){ history=[history[0]]; isFirst=true; showWelcome(); stopSpeak(); }
+sendBtn.addEventListener('click', send);
+input.addEventListener('keydown', (e)=>{ if(e.key==='Enter') send(); });
+showWelcome();
+</script>
+</body>
+</html>
