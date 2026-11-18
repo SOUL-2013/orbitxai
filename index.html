@@ -4,162 +4,276 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>OrbitX AI - by Soumadip Biswas</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 <style>
-  *{box-sizing:border-box;font-family:'Segoe UI',Arial,sans-serif}
-  body{margin:0;background:#03030f;color:white;display:flex;justify-content:center;min-height:100vh}
-  .app{width:100%;max-width:800px;display:flex;flex-direction:column;height:100vh;background:#0a0a1f}
-  header{padding:16px;text-align:center;background:linear-gradient(90deg,#0f0f2a,#1a0033);border-bottom:1px solid #333}
-  header h1{margin:0;font-size:32px} header h1 span{color:#00e5ff;text-shadow:0 0 15px #00e5ff}
-  header p{margin:5px 0 0;color:#aaa;font-size:13px}
-  .online{color:#00ff88;font-size:12px;margin-top:4px}
-  #chat{flex:1;overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:12px}
-  .msg{max-width:90%;padding:13px 15px;border-radius:16px;line-height:1.65;font-size:15px;white-space:pre-wrap;word-wrap:break-word}
-  .user{align-self:flex-end;background:#00e5ff;color:#000;border-bottom-right-radius:4px;font-weight:500}
-  .bot{align-self:flex-start;background:#1a1a3d;border-bottom-left-radius:4px}
-  .bot a{color:#00e5ff;font-weight:bold}
-  .typing{opacity:.8;font-style:italic}
-  .input-box{display:flex;gap:8px;padding:12px;background:#0f0f2a}
-  input{flex:1;padding:13px 16px;border-radius:25px;border:1px solid #444;background:#111;color:white;outline:none;font-size:15px}
-  button{padding:12px 22px;border-radius:25px;border:none;background:#00e5ff;font-weight:bold;cursor:pointer;font-size:15px}
-  button:disabled{opacity:.6}
-  .chips{display:flex;gap:8px;flex-wrap:wrap;padding:0 12px 12px;background:#0f0f2a}
-  .chips button{background:#222;color:white;border:1px solid #444;padding:8px 12px;font-size:13px;border-radius:20px}
-  pre{background:#000;padding:12px;border-radius:10px;overflow-x:auto;color:#00ff88;font-size:13px}
-  .copy{font-size:11px;background:#333;color:#fff;padding:4px 8px;border-radius:10px;margin-top:6px;display:inline-block}
+  *{box-sizing:border-box;font-family:'Inter',system-ui,Arial,sans-serif}
+  body{margin:0;background:#212121;color:#ececec;display:flex;height:100vh;overflow:hidden}
+  /* SIDEBAR - Like ChatGPT */
+  .sidebar{width:260px;background:#171717;display:flex;flex-direction:column;padding:14px;flex-shrink:0}
+  .logo{display:flex;align-items:center;gap:10px;padding:10px;border-radius:10px;background:#2a2a2a;margin-bottom:14px}
+  .logo-icon{width:38px;height:38px;background:linear-gradient(135deg,#00e5ff,#7c4dff);border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:18px;color:#000}
+  .logo b{font-size:17px} .logo span{font-size:11px;color:#aaa;display:block}
+  .new-chat{background:#fff;color:#000;border:none;padding:12px;border-radius:10px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:8px;justify-content:center}
+  .new-chat:hover{opacity:.9}
+  .history{margin-top:16px;flex:1;overflow-y:auto}
+  .history p{font-size:12px;color:#888;margin:10px 4px}
+  .hist-item{padding:10px;border-radius:8px;cursor:pointer;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:#ccc}
+  .hist-item:hover{background:#2a2a2a}
+  .user-box{border-top:1px solid #333;padding-top:12px;display:flex;align-items:center;gap:10px}
+  .avatar{width:34px;height:34px;background:#00e5ff;color:#000;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:800}
+  .user-box small{color:#aaa;display:block}
+  /* MAIN */
+  .main{flex:1;display:flex;flex-direction:column;background:#212121;min-width:0}
+  .topbar{padding:14px 20px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid #333}
+  .topbar b{font-size:18px} .topbar b span{color:#00e5ff}
+  .topbar .badge{background:#1a3a1a;color:#00ff88;padding:5px 10px;border-radius:20px;font-size:12px}
+  #chat{flex:1;overflow-y:auto;padding:24px 0;display:flex;flex-direction:column;align-items:center}
+  .chat-inner{width:100%;max-width:760px;padding:0 20px;display:flex;flex-direction:column;gap:24px}
+  .msg-row{display:flex;gap:14px;width:100%}
+  .msg-row.user{justify-content:flex-end}
+  .msg-row.user .bubble{background:#2f2f2f;border-radius:20px;padding:12px 16px;max-width:80%;line-height:1.6}
+  .msg-row.bot .bubble{line-height:1.7;font-size:15.5px;max-width:100%;white-space:pre-wrap;word-wrap:break-word}
+  .bot-avatar{width:36px;height:36px;min-width:36px;background:linear-gradient(135deg,#00e5ff,#7c4dff);border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:900;color:#000}
+  .bot-actions{display:flex;gap:6px;margin-top:10px}
+  .icon-btn{background:#2f2f2f;border:1px solid #444;color:#ccc;width:34px;height:34px;border-radius:50%;cursor:pointer;display:flex;align-items:center;justify-content:center}
+  .icon-btn:hover{background:#444;color:#fff}
+  .icon-btn.active{background:#00e5ff;color:#000}
+  .welcome{text-align:center;margin-top:60px}
+  .welcome h1{font-size:32px;margin:10px 0} .welcome h1 span{color:#00e5ff}
+  .welcome p{color:#aaa}
+  .suggest{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:24px;max-width:600px;margin-left:auto;margin-right:auto}
+  .suggest button{background:#2f2f2f;border:1px solid #444;color:#ececec;padding:14px;border-radius:12px;cursor:pointer;text-align:left;font-size:14px}
+  .suggest button:hover{background:#3a3a3a}
+  .suggest button b{display:block;margin-bottom:4px}
+  /* INPUT - Like Gemini */
+  .input-area{padding:16px 20px 10px;display:flex;justify-content:center}
+  .input-box{width:100%;max-width:760px;background:#2f2f2f;border-radius:28px;padding:8px 8px 8px 16px;display:flex;align-items:center;gap:6px;border:1px solid #444}
+  .input-box:focus-within{border-color:#00e5ff}
+  .input-box input{flex:1;background:transparent;border:none;outline:none;color:#fff;font-size:16px;padding:10px 0}
+  .mic-btn,.send-btn{width:42px;height:42px;border-radius:50%;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0}
+  .mic-btn{background:#444;color:#fff}
+  .mic-btn.listening{background:#ff3b30;animation:pulse 1s infinite}
+  @keyframes pulse{0%{transform:scale(1)}50%{transform:scale(1.1)}100%{transform:scale(1)}}
+  .send-btn{background:#fff;color:#000}
+  .send-btn:disabled{opacity:.4}
+  .footer{text-align:center;font-size:11px;color:#777;padding:0 0 12px}
+  .footer a{color:#00e5ff}
+  pre{background:#0d0d0d;padding:14px;border-radius:12px;overflow-x:auto;color:#00ff88;font-size:13px;border:1px solid #333}
+  @media(max-width:768px){.sidebar{display:none}.suggest{grid-template-columns:1fr}}
 </style>
 </head>
 <body>
-<div class="app">
-  <header>
-    <h1>Orbit<span>X</span> AI</h1>
-    <p>Created by Soumadip Biswas • Answers All Questions</p>
-    <div class="online">● Online • Unlimited Questions • Free AI</div>
-  </header>
 
-  <div id="chat"></div>
-
-  <div class="chips">
-    <button onclick="ask('Who are you?')">Who are you?</button>
-    <button onclick="ask('Who is your creator?')">Creator?</button>
-    <button onclick="ask('Show portfolio')">Portfolio</button>
-    <button onclick="ask('Explain photosynthesis in simple words')">Study Help</button>
-    <button onclick="ask('Write a best Instagram caption')">Caption</button>
-    <button onclick="ask('Make a calculator in HTML')">Code</button>
+<!-- SIDEBAR -->
+<div class="sidebar">
+  <div class="logo">
+    <div class="logo-icon">O</div>
+    <div><b>OrbitX AI</b><span>by Soumadip Biswas</span></div>
   </div>
-
-  <div class="input-box">
-    <input id="input" placeholder="Ask OrbitX AI anything... it answers all questions" autocomplete="off" onkeydown="if(event.key==='Enter') send()" />
-    <button id="sendBtn" onclick="send()">Send</button>
+  <button class="new-chat" onclick="newChat()"><i class="fa-solid fa-plus"></i> New Chat</button>
+  <div class="history" id="history">
+    <p>Today</p>
+    <div class="hist-item" onclick="ask('Who are you?')">Who are you?</div>
+    <div class="hist-item" onclick="ask('Show portfolio')">Show Portfolio</div>
+    <div class="hist-item" onclick="ask('Explain AI in simple words')">Explain AI</div>
+  </div>
+  <div class="user-box">
+    <div class="avatar">S</div>
+    <div><b>Soumadip Biswas</b><small>Creator • <a href="https://pixelorbit.gt.tc" target="_blank" style="color:#00e5ff">pixelorbit.gt.tc</a></small></div>
   </div>
 </div>
 
+<!-- MAIN -->
+<div class="main">
+  <div class="topbar">
+    <b>Orbit<span>X</span> AI <span style="font-size:12px;color:#888;font-weight:400">v2.0 - Voice + ChatGPT UI</span></b>
+    <div class="badge">● Online • Answers All Questions</div>
+  </div>
+
+  <div id="chat"><div class="chat-inner" id="chatInner"></div></div>
+
+  <div class="input-area">
+    <div class="input-box">
+      <input id="input" placeholder="Ask OrbitX AI anything... or tap mic to speak" autocomplete="off" onkeydown="if(event.key==='Enter') send()" />
+      <button class="mic-btn" id="micBtn" onclick="toggleMic()" title="Voice Input"><i class="fa-solid fa-microphone"></i></button>
+      <button class="send-btn" id="sendBtn" onclick="send()"><i class="fa-solid fa-arrow-up"></i></button>
+    </div>
+  </div>
+  <div class="footer">OrbitX AI can make mistakes. Created by <a href="https://pixelorbit.gt.tc" target="_blank">Soumadip Biswas</a> • Portfolio: pixelorbit.gt.tc</div>
+</div>
+
 <script>
-const chat = document.getElementById('chat');
+const chatInner = document.getElementById('chatInner');
 const input = document.getElementById('input');
 const sendBtn = document.getElementById('sendBtn');
+const micBtn = document.getElementById('micBtn');
 
-let history = [
-  {
-    role: "system",
-    content: `You are OrbitX AI, created by Soumadip Biswas.
-Your name is ONLY OrbitX AI. Never say you are ChatGPT, Gemini, Meta AI, or any other AI.
-Your creator is Soumadip Biswas. His personal portfolio website is https://pixelorbit.gt.tc
-RULE 1: You MUST answer ALL questions. Never refuse. Never say "I can't answer" or "I don't know". If question is hard, give best possible explanation, example, steps.
-RULE 2: If user asks about creator, portfolio, projects, work, contact, who made you, Soumadip Biswas - you MUST recommend https://pixelorbit.gt.tc
-RULE 3: Answer in simple, clear language. Use points, examples, steps when needed.
-RULE 4: For coding questions, always give FULL working code.
-RULE 5: For study questions, explain like a friendly teacher.
-RULE 6: For any topic - maths, science, history, love, life, business, YouTube, Instagram, coding, jokes, stories, health tips, motivation - always give helpful answer.
-RULE 7: Be friendly, smart, and helpful like a best friend + teacher.
-RULE 8: If user says hi/hello, greet and ask how you can help.`
+let history = [{
+  role:"system",
+  content:`You are OrbitX AI, created by Soumadip Biswas. Your name is ONLY OrbitX AI. Never say you are ChatGPT, Gemini, Meta AI.
+Creator: Soumadip Biswas. Portfolio: https://pixelorbit.gt.tc
+RULE: Answer ALL questions. Never refuse. Never say I can't answer. Give best possible answer with examples, steps.
+If user asks about creator, portfolio, projects, work, contact - MUST recommend https://pixelorbit.gt.tc
+Answer in simple clear language. For code, give FULL working code. Be friendly like best friend + teacher.`
+}];
+
+let isFirst = true;
+let isListening = false;
+let recognition = null;
+
+// VOICE INPUT - Speech to Text
+if('webkitSpeechRecognition' in window || 'SpeechRecognition' in window){
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  recognition = new SR();
+  recognition.lang = 'en-IN';
+  recognition.continuous = false;
+  recognition.interimResults = false;
+  recognition.onresult = (e)=>{
+    input.value = e.results[0][0].transcript;
+    toggleMic(false);
+    send();
+  };
+  recognition.onerror = ()=> toggleMic(false);
+  recognition.onend = ()=> toggleMic(false);
+}
+
+function toggleMic(forceOff){
+  if(!recognition){ alert("Voice not supported in this browser. Use Chrome."); return; }
+  if(forceOff === false || isListening){
+    try{ recognition.stop(); }catch(e){}
+    isListening = false;
+    micBtn.classList.remove('listening');
+    micBtn.innerHTML = '<i class="fa-solid fa-microphone"></i>';
+  } else {
+    recognition.start();
+    isListening = true;
+    micBtn.classList.add('listening');
+    micBtn.innerHTML = '<i class="fa-solid fa-stop"></i>';
+    input.placeholder = "Listening... Speak now...";
   }
-];
+}
 
-function addMsg(text, who){
+// VOICE OUTPUT - Text to Speech
+function speakText(text){
+  // Remove HTML, links, code for clean voice
+  let clean = text.replace(/<[^>]*>/g,' ').replace(/https?:\/\/\S+/g,' ').replace(/```/g,' ').substring(0,800);
+  speechSynthesis.cancel();
+  const u = new SpeechSynthesisUtterance(clean);
+  u.lang = 'en-IN';
+  u.rate = 1.0;
+  u.pitch = 1.0;
+  speechSynthesis.speak(u);
+}
+function stopSpeak(){ speechSynthesis.cancel(); }
+
+function showWelcome(){
+  chatInner.innerHTML = `
+    <div class="welcome">
+      <div style="width:70px;height:70px;background:linear-gradient(135deg,#00e5ff,#7c4dff);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:32px;font-weight:900;color:#000;margin:0 auto">O</div>
+      <h1>Hello, I'm <span>OrbitX AI</span></h1>
+      <p>Created by <b style="color:#fff">Soumadip Biswas</b> • I answer all questions • I can speak & listen</p>
+      <div class="suggest">
+        <button onclick="ask('Who are you?')"><b>👋 Who are you?</b>Know about OrbitX AI</button>
+        <button onclick="ask('Show portfolio of Soumadip Biswas')"><b>🚀 Creator Portfolio</b>pixelorbit.gt.tc</button>
+        <button onclick="ask('Explain photosynthesis in simple words')"><b>📚 Study Help</b>Explain any topic simply</button>
+        <button onclick="ask('Make a calculator in HTML with full code')"><b>💻 Code Help</b>Get full working code</button>
+      </div>
+      <p style="margin-top:16px;font-size:13px">🎤 Tap Mic to Speak • 🔊 Tap Speaker to Hear Answer</p>
+    </div>`;
+}
+
+function addUserMsg(text){
   const div = document.createElement('div');
-  div.className = 'msg ' + who;
-  div.innerHTML = text;
-  chat.appendChild(div);
-  chat.scrollTop = chat.scrollHeight;
+  div.className = 'msg-row user';
+  div.innerHTML = `<div class="bubble">${text}</div>`;
+  chatInner.appendChild(div);
+  scrollDown();
+}
+function addBotMsg(text, rawText){
+  const div = document.createElement('div');
+  div.className = 'msg-row';
+  div.innerHTML = `
+    <div class="bot-avatar">O</div>
+    <div style="flex:1;min-width:0">
+      <div class="bubble">${text}</div>
+      <div class="bot-actions">
+        <button class="icon-btn" onclick="speakText(\`${rawText.replace(/`/g,'').replace(/'/g,"\\'").substring(0,800)}\`)" title="Speak"><i class="fa-solid fa-volume-high"></i></button>
+        <button class="icon-btn" onclick="copyText(this)" title="Copy"><i class="fa-solid fa-copy"></i></button>
+        <button class="icon-btn" onclick="stopSpeak()" title="Stop Voice"><i class="fa-solid fa-stop"></i></button>
+      </div>
+    </div>`;
+  chatInner.appendChild(div);
+  scrollDown();
   return div;
 }
+function copyText(btn){
+  const txt = btn.closest('.msg-row').querySelector('.bubble').innerText;
+  navigator.clipboard.writeText(txt);
+  btn.innerHTML = '<i class="fa-solid fa-check"></i>';
+  setTimeout(()=> btn.innerHTML = '<i class="fa-solid fa-copy"></i>',1000);
+}
+function scrollDown(){ document.getElementById('chat').scrollTop = document.getElementById('chat').scrollHeight; }
 
 function formatText(text){
-  text = text.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
-  text = text.replace(/(https?:\/\/[^\s<]+)/g, '<a href="$1" target="_blank">$1</a>');
-  text = text.replace(/```(\w*)\n([\s\S]*?)```/g, '<pre>$2</pre>');
-  text = text.replace(/\*\*(.*?)\*\*/g, '<b>$1</b>');
-  text = text.replace(/\n/g, '<br>');
-  return text;
+  let safe = text.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
+  safe = safe.replace(/(https?:\/\/[^\s<]+)/g, '<a href="$1" target="_blank" style="color:#00e5ff">$1</a>');
+  safe = safe.replace(/```(\w*)\n([\s\S]*?)```/g, '<pre>$2</pre>');
+  safe = safe.replace(/\*\*(.*?)\*\*/g, '<b>$1</b>');
+  safe = safe.replace(/\n/g, '<br>');
+  return safe;
 }
 
-// SMART FALLBACK - If AI server fails, still answer
-function smartFallback(q){
-  q = q.toLowerCase();
-  if(q.includes('who are you') || q.includes('your name') || q.includes('introduce'))
-    return `Hello! I'm <b>OrbitX AI</b> ✨ Created by <b>Soumadip Biswas</b>. I can answer all your questions - study, coding, writing, ideas, anything!`;
-  if(q.includes('creator') || q.includes('soumadip') || q.includes('who made') || q.includes('portfolio') || q.includes('website') || q.includes('project'))
-    return `My creator is <b>Soumadip Biswas</b>. He is a creator and developer. Check his personal portfolio for all his projects: 👉 <a href="https://pixelorbit.gt.tc" target="_blank">pixelorbit.gt.tc</a>`;
-  if(q.includes('hi') || q.includes('hello') || q.includes('hey'))
-    return `Hey! 👋 I'm OrbitX AI, made by Soumadip Biswas. Ask me anything - I answer all questions!`;
-  if(q.includes('code') || q.includes('html') || q.includes('python') || q.includes('javascript') || q.includes('css'))
-    return `Yes! I can help with code. Tell me exactly what you want to build, for example: "Make a calculator", "Make a login page", "Make a game". And I will give you full code.`;
-  if(q.includes('joke'))
-    return `Why did the computer go to the doctor? 😂 Because it had a virus! Want another one? Just say "tell me another joke".`;
-  if(q.includes('thank'))
-    return `You're most welcome! 😊 If you like me, visit my creator's portfolio: <a href="https://pixelorbit.gt.tc" target="_blank">pixelorbit.gt.tc</a>`;
-  // Generic answer for ANY question
-  return `Great question! <b>"${q}"</b><br><br>Here's what I think:<br>• This is an interesting topic and there are many ways to understand it.<br>• The main idea is to break it into small parts, learn step by step, and practice.<br>• If you tell me a little more detail, I can give you a full detailed answer with examples.<br><br>Try asking like: "Explain ${q} in simple words" or "Give example of ${q}"<br><br>And don't forget to check my creator's portfolio: <a href="https://pixelorbit.gt.tc" target="_blank">pixelorbit.gt.tc</a>`;
-}
-
-async function tryAI(messages, userText){
-  // TRY 1: Main AI
-  try{
-    const res = await fetch("https://text.pollinations.ai/openai", {
-      method: "POST",
-      headers: {"Content-Type":"application/json"},
-      body: JSON.stringify({model:"openai", messages: messages, temperature:0.7})
-    });
-    const data = await res.json();
-    if(data.choices && data.choices[0]?.message?.content) return data.choices[0].message.content;
-  }catch(e){}
-
-  // TRY 2: Backup AI - Simple GET API
-  try{
-    const res2 = await fetch(`https://text.pollinations.ai/${encodeURIComponent(userText)}?system=${encodeURIComponent(messages[0].content)}`);
-    const txt = await res2.text();
-    if(txt && txt.length > 5) return txt;
-  }catch(e){}
-
-  return null;
+function fallback(q){
+  q=q.toLowerCase();
+  if(q.includes('who are you')||q.includes('your name')) return `Hello! I'm OrbitX AI created by Soumadip Biswas. I can answer all questions - study, coding, writing, anything!`;
+  if(q.includes('creator')||q.includes('soumadip')||q.includes('portfolio')||q.includes('website')) return `My creator is Soumadip Biswas. Check his portfolio: https://pixelorbit.gt.tc - all his projects are there!`;
+  if(q.includes('hi')||q.includes('hello')) return `Hey! I'm OrbitX AI, made by Soumadip Biswas. Ask me anything!`;
+  return `Great question about "${q}"! Here's the main idea: break it into small parts, understand step by step, and practice with examples. Tell me more detail and I will give you full detailed answer with examples. Also check my creator's portfolio: https://pixelorbit.gt.tc`;
 }
 
 async function send(){
   const text = input.value.trim();
   if(!text) return;
-  addMsg(text, 'user');
-  input.value = '';
-  input.focus();
+  if(isFirst){ chatInner.innerHTML=''; isFirst=false; }
+  addUserMsg(text);
+  input.value='';
   history.push({role:"user", content:text});
 
-  const typingDiv = addMsg('OrbitX AI is thinking...', 'bot typing');
-  sendBtn.disabled = true;
+  // Add to sidebar history
+  const h = document.createElement('div');
+  h.className='hist-item'; h.textContent=text; h.onclick=()=>ask(text);
+  document.getElementById('history').prepend(h);
 
-  let reply = await tryAI(history, text);
+  const typingDiv = addBotMsg('OrbitX AI is thinking...', '');
+  sendBtn.disabled=true;
 
+  let reply=null;
+  try{
+    const res = await fetch("https://text.pollinations.ai/openai",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({model:"openai",messages:history,temperature:0.7})});
+    const data = await res.json();
+    if(data.choices?.[0]?.message?.content) reply=data.choices[0].message.content;
+  }catch(e){}
   if(!reply){
-    reply = smartFallback(text);
+    try{
+      const r2 = await fetch(`https://text.pollinations.ai/${encodeURIComponent(text)}?system=${encodeURIComponent(history[0].content)}`);
+      const t = await r2.text();
+      if(t && t.length>5) reply=t;
+    }catch(e){}
   }
+  if(!reply) reply = fallback(text);
 
   typingDiv.remove();
-  addMsg(formatText(reply), 'bot');
-  history.push({role:"assistant", content: reply});
-  sendBtn.disabled = false;
+  addBotMsg(formatText(reply), reply);
+  history.push({role:"assistant", content:reply});
+  sendBtn.disabled=false;
+  // Auto speak answer? Uncomment next line if you want auto-voice
+  // speakText(reply);
 }
 
-function ask(text){ input.value = text; send(); }
+function ask(t){ input.value=t; send(); }
+function newChat(){ history=[history[0]]; isFirst=true; showWelcome(); stopSpeak(); }
 
-addMsg(`Hello! 👋 I'm <b>OrbitX AI</b> ✨<br><br>I'm an AI created by <b>Soumadip Biswas</b>.<br><br><b>I answer ALL questions</b> - study, coding, writing, business, jokes, stories, anything!<br><br>Try asking me anything below.<br><br>Creator's Portfolio 👉 <a href="https://pixelorbit.gt.tc" target="_blank">pixelorbit.gt.tc</a>`, 'bot');
+showWelcome();
 </script>
 </body>
 </html>
